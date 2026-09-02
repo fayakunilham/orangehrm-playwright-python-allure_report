@@ -1,8 +1,7 @@
 import time
-from asyncio import timeout
+import re
 
 from playwright.sync_api import Page, expect
-
 from Utils.screenshot import Screenshot
 
 
@@ -31,15 +30,43 @@ class AdminPage:
         expect(
             self.page.get_by_role(
                 "heading",
-                name="Admin"
+                name="System Users"
             )
         ).to_be_visible(
             timeout=10000
         )
 
+        #  Wait until system user heading is visible
+        system_user_heading = self.page.get_by_role(
+            "heading",
+            name="System Users",
+            exact=True
+        )
+
+        expect(
+            system_user_heading
+        ).to_be_visible(
+            timeout=15000
+        )
+
+        # Wait until Records Found is visible
+        records_found = self.page.get_by_text(
+            re.compile(r"\(\d+\)\s+Records?\s+Found")
+        )
+
+        expect(records_found).to_be_visible(
+            timeout=15000
+        )
+
+        # Screenshot setelah hasil pencarian muncul
         Screenshot.take(
             self.page,
-            "19. Admin Page"
+            "Admin Page",
+            wait_for=[
+                system_user_heading,
+                records_found
+            ],
+            timeout=15000
         )
 
     # =========================================================
@@ -54,20 +81,26 @@ class AdminPage:
         expect(
             username_field
         ).to_be_visible(
-            timeout=10000
+            timeout=15000
         )
 
         username_field.fill(username)
 
-        self.page.wait_for_timeout(10000)
-
-        self.page.wait_for_load_state(
-            "domcontentloaded"
+        # Wait until Records Found is visible
+        records_found = self.page.get_by_text(
+            re.compile(r"\(\d+\)\s+Records?\s+Found")
         )
 
+        expect(records_found).to_be_visible(
+            timeout=15000
+        )
+
+        # Screenshot setelah hasil pencarian muncul
         Screenshot.take(
             self.page,
-            "22. Searching User Admin"
+            "Searching User Admin",
+            wait_for=records_found,
+            timeout=15000
         )
 
         self.page.get_by_role(
@@ -75,14 +108,27 @@ class AdminPage:
             name="Search"
         ).click()
 
-        self.page.wait_for_load_state(
-            "domcontentloaded"
+        # Tunggu hasil pencarian
+        button_add = self.page.get_by_role(
+            "button",
+            name="Add"
         )
 
+        expect(button_add).to_be_visible(
+            timeout=15000
+        )
+
+        # Screenshot setelah hasil pencarian muncul
         Screenshot.take(
             self.page,
-            "23. Search User Result"
+            "Search User Result",
+            wait_for=[
+                button_add,
+                records_found
+                ],
+            timeout=15000
         )
+
     # =========================================================
     # VERIFY USER
     # =========================================================
@@ -133,7 +179,7 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "20. Halaman Create user Admin"
+            "Halaman Create user Admin"
         )
 
     # =========================================================
@@ -275,7 +321,7 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "21. Before Save User Admin"
+            "Before Save User Admin"
         )
 
         # -----------------------------------------------------
@@ -291,7 +337,7 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "21. After Save User Admin"
+            "After Save User Admin"
         )
 
     # =========================================================
@@ -310,7 +356,7 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "22. User Admin Found"
+            "User Admin Found"
         )
 
     # =========================================================
@@ -347,7 +393,13 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "23. Before Edit User Admin"
+            "Before Edit User Admin",
+            wait_for=
+            self.page.get_by_role(
+                "button",
+                name="Save"
+            ),
+            timeout=30000
         )
 
     # =========================================================
@@ -373,7 +425,7 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "24. After Edit User Admin"
+            "After Edit User Admin"
         )
 
         # -----------------------------------------------------
@@ -397,9 +449,11 @@ class AdminPage:
             timeout=10000
         )
 
+        # Screenshot setelah hasil pencarian muncul
         Screenshot.take(
             self.page,
-            "25. Succesfully Updated User Admin"
+            "Succesfully Updated User Admin",
+            timeout=15000
         )
 
     # =========================================================

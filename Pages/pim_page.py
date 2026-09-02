@@ -1,278 +1,831 @@
+import re
 import random
 import time
 from pathlib import Path
+
 from playwright.sync_api import Page, expect
+
 from Utils.screenshot import Screenshot
 
 
 class EmployeePage:
 
-    def __init__(self, page: Page):
+    def __init__(self, page: Page, logger=None):
+
+        # ==========================================================
+        # INITIALIZE PLAYWRIGHT PAGE
+        # ==========================================================
+
         self.page = page
+
+        # ==========================================================
+        # INITIALIZE LOGGER
+        # ==========================================================
+
+        self.logger = logger
+
+        # ==========================================================
+        # GENERATE UNIQUE TEST DATA
+        # ==========================================================
 
         timestamp = int(time.time())
 
+        # Generate employee first name
         self.first_name = f"Jalal{timestamp}"
+
+        # Generate employee middle name
         self.middle_name = "Lil"
+
+        # Generate employee last name
         self.last_name = "Udin"
+
+        # Generate new last name for update test
         self.new_last_name = "Jaenal"
 
-        self.employee_id = str(random.randint(100000, 999999))
+        # Generate random employee ID
+        self.employee_id = str(
+            random.randint(100000, 999999)
+        )
 
+        # Generate unique username
         self.username = f"Jalal{timestamp}"
+
+        # Password for test user
         self.password = "Admin123!"
 
-    # ====================================================
-    # OPEN MENU
-    # ====================================================
+    # ==========================================================
+    # LOG HELPER
+    # ==========================================================
+
+    def log(self, message):
+
+        # Write message to logger if logger is available
+        if self.logger:
+            self.logger.info(message)
+
+    # ==========================================================
+    # OPEN PIM MENU
+    # ==========================================================
 
     def open_pim(self):
-        self.page.get_by_role("link", name="PIM").click()
 
-        self.page.wait_for_load_state("domcontentloaded")
+        self.log(
+            "PIM - Opening PIM menu"
+        )
 
-        self.page.wait_for_timeout(10000)
+        # Click PIM menu
+        self.page.get_by_role(
+            "link",
+            name="PIM"
+        ).click()
 
-        # Take Screenshot Pim Page
-        Screenshot.take(self.page, "6. PIM Page")
+        self.log(
+            "PIM - Waiting for Records Found"
+        )
 
-    # ====================================================
-    # CLICK ADD
-    # ====================================================
+        # Wait until Records Found is visible
+        records_found = self.page.get_by_text(
+            re.compile(r"\(\d+\)\s+Records?\s+Found")
+        )
+
+        expect(
+            records_found
+        ).to_be_visible(
+            timeout=15000
+        )
+
+        self.log(
+            "PIM - Records Found is visible"
+        )
+
+        # Take screenshot of PIM page
+        Screenshot.take(
+            self.page,
+            "PIM Page",
+            wait_for=records_found,
+            timeout=20000
+        )
+
+        self.log(
+            "PIM - PIM page opened successfully"
+        )
+
+    # ==========================================================
+    # CLICK ADD EMPLOYEE
+    # ==========================================================
 
     def click_add(self):
 
+        self.log(
+            "CREATE - Opening Add Employee page"
+        )
+
+        # Open PIM menu
         self.open_pim()
 
-        self.page.get_by_role("button", name="Add").click()
+        # Click Add button
+        self.page.get_by_role(
+            "button",
+            name="Add"
+        ).click()
 
-        self.page.wait_for_timeout(10000)
+        self.log(
+            "CREATE - Add button clicked"
+        )
 
+        # Locate Add Employee heading
+        add_employee_heading = self.page.get_by_role(
+            "heading",
+            name="Add Employee",
+            exact=True
+        )
+
+        # Wait until Add Employee page is visible
         expect(
-            self.page.get_by_role("heading", name="Add Employee")
-        ).to_be_visible(timeout=10000)
+            add_employee_heading
+        ).to_be_visible(
+            timeout=15000
+        )
 
-        # Take Screenshot Add User
-        Screenshot.take(self.page, "7. Add User Page (PIM)")
+        self.log(
+            "CREATE - Add Employee page opened successfully"
+        )
 
-        # ====================================================
+        # Take screenshot of Add Employee page
+        Screenshot.take(
+            self.page,
+            "Add User Page (PIM)",
+            wait_for=[
+                add_employee_heading,
+                self.page.get_by_role(
+                    "button",
+                    name="Save"
+                )
+            ],
+            timeout=15000
+        )
+
+    # ==========================================================
     # CREATE EMPLOYEE
-    # ====================================================
+    # ==========================================================
 
     def create_employee(self):
 
-        # -----------------------
-        # Upload Photo
-        # -----------------------
+        self.log(
+            "CREATE - Starting employee creation"
+        )
 
-        photo = Path("assets/profile.jpg")
+        # ======================================================
+        # UPLOAD PROFILE PHOTO
+        # ======================================================
 
-        self.page.locator("input[type='file']").set_input_files(photo)
+        self.log(
+            "CREATE - Uploading profile photo"
+        )
 
-        self.page.wait_for_timeout(10000)
+        # Define profile photo path
+        photo = Path(
+            "assets/profile.jpg"
+        )
 
-        Screenshot.take(self.page, "8. Upload Profile")
+        # Locate file upload input
+        file_input = self.page.locator(
+            "input[type='file']"
+        )
 
-        # -----------------------
-        # Employee Information
-        # -----------------------
+        # Upload profile photo
+        file_input.set_input_files(
+            photo
+        )
 
-        self.page.locator("input[name='firstName']").fill(
+        self.log(
+            "CREATE - Profile photo uploaded successfully"
+        )
+
+        # Take screenshot after upload
+        Screenshot.take(
+            self.page,
+            "Upload Profile"
+        )
+
+        # ======================================================
+        # EMPLOYEE INFORMATION
+        # ======================================================
+
+        self.log(
+            "CREATE - Filling employee information"
+        )
+
+        # Fill first name
+        self.page.locator(
+            "input[name='firstName']"
+        ).fill(
             self.first_name
         )
 
-        self.page.locator("input[name='middleName']").fill(
+        # Fill middle name
+        self.page.locator(
+            "input[name='middleName']"
+        ).fill(
             self.middle_name
         )
 
-        self.page.locator("input[name='lastName']").fill(
+        # Fill last name
+        self.page.locator(
+            "input[name='lastName']"
+        ).fill(
             self.last_name
         )
 
-        # Employee Full Name
+        # Locate Employee ID input
         employee_id = self.page.locator(
             "input.oxd-input"
         ).nth(4)
 
+        # Clear existing Employee ID
         employee_id.clear()
 
-        employee_id.fill(self.employee_id)
+        # Fill generated Employee ID
+        employee_id.fill(
+            self.employee_id
+        )
 
-        self.page.wait_for_timeout(10000)
+        self.log(
+            f"CREATE - Employee information filled: "
+            f"{self.first_name} {self.middle_name} {self.last_name}"
+        )
 
-        #Screenshoot Employee Full Name
-        Screenshot.take(self.page, "9. Employee Full Name")
+        # Take screenshot of employee information
+        Screenshot.take(
+            self.page,
+            "Employee Full Name",
+            wait_for=[
+                self.page.locator(
+                    "input[name='firstName']"
+                ),
+                self.page.locator(
+                    "input[name='middleName']"
+                ),
+                self.page.locator(
+                    "input[name='lastName']"
+                )
+            ],
+            timeout=15000
+        )
 
-        # -----------------------
-        # Create Login Details
-        # -----------------------
+        # ======================================================
+        # CREATE LOGIN DETAILS
+        # ======================================================
 
-        self.page.locator(".oxd-switch-input").click()
+        self.log(
+            "CREATE - Enabling Create Login Details"
+        )
 
-        # Username
+        # Enable Create Login Details switch
         self.page.locator(
+            ".oxd-switch-input"
+        ).click()
+
+        # Locate username input
+        username_input = self.page.locator(
             "input.oxd-input"
-        ).nth(5).fill(
+        ).nth(5)
+
+        # Wait until username input is visible
+        expect(
+            username_input
+        ).to_be_visible(
+            timeout=15000
+        )
+
+        # Fill username
+        username_input.fill(
             self.username
         )
 
-        # Status
+        self.log(
+            f"CREATE - Username filled: {self.username}"
+        )
+
+        # Select Enabled status
         self.page.get_by_role(
             "radio",
             name="Enabled"
         ).check()
 
-        # Password
-        self.page.locator(
+        # Locate password fields
+        password_fields = self.page.locator(
             "input[type='password']"
-        ).nth(0).fill(
+        )
+
+        # Fill password
+        password_fields.nth(0).fill(
             self.password
         )
 
-        # Confirm Password
-        self.page.locator(
-            "input[type='password']"
-        ).nth(1).fill(
+        # Fill confirm password
+        password_fields.nth(1).fill(
             self.password
         )
 
-        self.page.wait_for_timeout(10000)
+        self.log(
+            "CREATE - Login details completed"
+        )
 
-        #Screenshot Create Login Details
-        Screenshot.take(self.page, "10. Create Login Details")
+        # Take screenshot of login details
+        Screenshot.take(
+            self.page,
+            "Create Login Details",
+            wait_for=[
+                username_input,
+                password_fields.nth(0),
+                password_fields.nth(1),
+                self.page.get_by_role(
+                    "button",
+                    name="Save"
+                )
+            ],
+            timeout=15000
+        )
 
-        # -----------------------
-        # Save
-        # -----------------------
+        # ======================================================
+        # SAVE EMPLOYEE
+        # ======================================================
 
+        self.log(
+            "CREATE - Clicking Save button"
+        )
+
+        # Click Save button
         self.page.get_by_role(
             "button",
             name="Save"
         ).click()
 
-        # Tunggu redirect
-        self.page.wait_for_url(
-            "**/viewPersonalDetails/**",
-            timeout=10000
+        # ======================================================
+        # WAIT FOR PERSONAL DETAILS PAGE
+        # ======================================================
+
+        self.log(
+            "CREATE - Waiting for Personal Details page"
         )
 
-        # Screenshot Create user Success
-        Screenshot.take(self.page, "11. Create user Success")
+        personal_details = self.page.get_by_role(
+            "heading",
+            name="Personal Details",
+            exact=True
+        )
 
-        # Validasi berhasil
-    def waiting_personal_detail(self):
+        # Wait until Personal Details is visible
         expect(
-            self.page.get_by_role(
-                "heading",
-                name="Personal Details"
-            )
-        ).to_be_visible(timeout=10000)
+            personal_details
+        ).to_be_visible(
+            timeout=30000
+        )
 
-        # Screenshot Validasi berhasil
-        Screenshot.take(self.page, "12. Validasi berhasil")
+        self.page.wait_for_load_state(
+            "domcontentloaded"
+        )
 
-        # =================================
-        # RETURN EMPLOYEE NAME
-        # =================================
+        self.log(
+            "CREATE - Personal Details page opened successfully"
+        )
 
-        employee_name = f"{self.first_name} {self.middle_name} {self.last_name}"
+        # ======================================================
+        # SCREENSHOT CREATE USER SUCCESS
+        # ======================================================
 
-        print("Employee Name dari PIM:", employee_name)
+        Screenshot.take(
+            self.page,
+            "Create User Success",
+            wait_for=[
+                personal_details,
+                self.page.get_by_text(
+                    "Employee Full Name",
+                    exact=True
+                ),
+                self.page.get_by_role(
+                    "heading",
+                    name="Custom Fields",
+                    exact=True
+                ),
+                self.page.get_by_role(
+                    "heading",
+                    name="Attachments",
+                    exact=True
+                )
+            ],
+            timeout=30000
+        )
 
+        self.log(
+            f"CREATE - Employee created successfully: "
+            f"{self.first_name} {self.middle_name} {self.last_name}"
+        )
+
+    # ==========================================================
+    # VALIDATE PERSONAL DETAILS
+    # ==========================================================
+
+    def waiting_personal_detail(self):
+
+        self.log(
+            "VALIDATE - Checking Personal Details"
+        )
+
+        # Locate Personal Details heading
+        personal_details = self.page.get_by_role(
+            "heading",
+            name="Personal Details",
+            exact=True
+        )
+
+        # Validate Personal Details is visible
+        expect(
+            personal_details
+        ).to_be_visible(
+            timeout=15000
+        )
+
+        # Take screenshot of validation result
+        Screenshot.take(
+            self.page,
+            "Validasi berhasil",
+            wait_for=personal_details,
+            timeout=15000
+        )
+
+        # ======================================================
+        # CREATE EMPLOYEE FULL NAME
+        # ======================================================
+
+        employee_name = (
+            f"{self.first_name} "
+            f"{self.middle_name} "
+            f"{self.last_name}"
+        )
+
+        # Write employee name to log
+        self.log(
+            f"VALIDATE - Employee Name dari PIM: "
+            f"{employee_name}"
+        )
+
+        # Return employee name
         return employee_name
 
-    # =========================
-    # SEARCH
-    # =========================
+    # ==========================================================
+    # SEARCH EMPLOYEE
+    # ==========================================================
 
     def search_employee(self):
 
+        self.log(
+            f"READ - Searching employee: "
+            f"{self.first_name}"
+        )
+
+        # Open PIM menu
         self.open_pim()
 
+        # Locate employee search input
         employee = self.page.locator(
             "input[placeholder='Type for hints...']"
         ).first
 
-        employee.fill(self.first_name)
+        # Fill employee name
+        employee.fill(
+            self.first_name
+        )
 
-        self.page.wait_for_timeout(10000)
+        self.log(
+            f"READ - Employee search keyword entered: "
+            f"{self.first_name}"
+        )
 
-        self.page.wait_for_load_state("domcontentloaded")
+        # Locate autocomplete option
+        autocomplete = self.page.locator(
+            ".oxd-autocomplete-option"
+        )
 
-        # Take Screenshot Searching User
-        Screenshot.take(self.page, "13. Searching user")
+        # Wait for autocomplete result
+        autocomplete.first.wait_for(
+            state="visible",
+            timeout=15000
+        )
 
-        if self.page.locator(".oxd-autocomplete-option").count() > 0:
-            self.page.locator(".oxd-autocomplete-option").first.click()
+        self.log(
+            "READ - Autocomplete employee found"
+        )
 
-        self.page.get_by_role("button", name="Search").click()
+        # Take screenshot while searching
+        Screenshot.take(
+            self.page,
+            "Searching User",
+            wait_for=autocomplete.first,
+            timeout=15000
+        )
 
-        self.page.wait_for_load_state("domcontentloaded")
+        # Click first autocomplete result
+        autocomplete.first.click()
 
-        # Take Screenshot Open page Update data User
-        Screenshot.take(self.page, "14. Open page Update data User")
+        self.log(
+            "READ - Employee selected from autocomplete"
+        )
 
-    # =========================
-    # UPDATE
-    # =========================
+        # Click Search button
+        self.page.get_by_role(
+            "button",
+            name="Search"
+        ).click()
+
+        self.log(
+            "READ - Search button clicked"
+        )
+
+        # Locate employee table row
+        employee_row = self.page.locator(
+            ".oxd-table-row"
+        ).filter(
+            has_text=self.first_name
+        )
+
+        # Wait for employee row
+        employee_row.wait_for(
+            state="visible",
+            timeout=15000
+        )
+
+        self.log(
+            f"READ - Employee found successfully: "
+            f"{self.first_name}"
+        )
+
+        # Take screenshot after search
+        Screenshot.take(
+            self.page,
+            "Open Page Update Data User",
+            wait_for=employee_row,
+            timeout=15000
+        )
+
+    # ==========================================================
+    # CLICK UPDATE
+    # ==========================================================
 
     def click_update(self):
 
-        row = self.page.locator(".oxd-table-row").filter(
+        self.log(
+            "UPDATE - Opening employee edit page"
+        )
+
+        # Locate employee row
+        row = self.page.locator(
+            ".oxd-table-row"
+        ).filter(
             has_text=self.first_name
         )
 
-        row.locator("button").first.click()
+        # Click Edit button
+        row.locator(
+            "button"
+        ).first.click()
+
+        self.log(
+            "UPDATE - Edit button clicked"
+        )
+
+        # Locate Last Name field
+        lastname = self.page.locator(
+            "input[name='lastName']"
+        )
+
+        # Wait until Last Name field is visible
+        expect(
+            lastname
+        ).to_be_visible(
+            timeout=15000
+        )
+
+        self.log(
+            "UPDATE - Employee edit page opened successfully"
+        )
+
+    # ==========================================================
+    # UPDATE EMPLOYEE
+    # ==========================================================
 
     def update_employee(self):
 
-        lastname = self.page.locator("input[name='lastName']")
+        self.log(
+            f"UPDATE - Changing last name from "
+            f"{self.last_name} to {self.new_last_name}"
+        )
 
+        # Locate Last Name field
+        lastname = self.page.locator(
+            "input[name='lastName']"
+        )
+
+        # Clear existing Last Name
         lastname.clear()
 
-        lastname.fill(self.new_last_name)
+        # Fill new Last Name
+        lastname.fill(
+            self.new_last_name
+        )
 
-        self.page.wait_for_timeout(10000)
+        self.log(
+            "UPDATE - New last name entered"
+        )
 
-        self.page.wait_for_load_state("domcontentloaded")
+        # Take screenshot before update
+        Screenshot.take(
+            self.page,
+            "Complete Input Data for Update User",
+            wait_for=[
+                self.page.get_by_role(
+                    "heading",
+                    name="Personal Details",
+                    exact=True
+                ),
+                self.page.get_by_text(
+                    "Employee Full Name",
+                    exact=True
+                ),
+                self.page.get_by_role(
+                    "heading",
+                    name="Custom Fields",
+                    exact=True
+                ),
+                self.page.get_by_role(
+                    "heading",
+                    name="Attachments",
+                    exact=True
+                )
+            ],
+            timeout=30000
+        )
 
-        # Screenshot Complete input data for Update User
-        Screenshot.take(self.page, "15. Complete input data for Update User")
+        self.log(
+            "UPDATE - Clicking Save button"
+        )
 
-        self.page.get_by_role("button", name="Save").nth(0).click()
+        # Click Save button
+        self.page.get_by_role(
+            "button",
+            name="Save"
+        ).first.click()
 
-        self.page.wait_for_timeout(10000)
+        # Take screenshot after update
+        Screenshot.take(
+            self.page,
+            "Success Update User",
+            wait_for=[
+                self.page.get_by_role(
+                    "heading",
+                    name="Personal Details",
+                    exact=True
+                ),
+                self.page.get_by_text(
+                    "Employee Full Name",
+                    exact=True
+                ),
+                self.page.get_by_role(
+                    "heading",
+                    name="Custom Fields",
+                    exact=True
+                ),
+                self.page.get_by_role(
+                    "heading",
+                    name="Attachments",
+                    exact=True
+                )
+            ],
+            timeout=30000
+        )
 
-        # Screenshot Complete input data for Update User
-        Screenshot.take(self.page, "16. Success Update User")
+        self.log(
+            f"UPDATE - Employee updated successfully: "
+            f"{self.first_name} {self.middle_name} "
+            f"{self.new_last_name}"
+        )
 
-    # =========================
-    # DELETE
-    # =========================
+    # ==========================================================
+    # DELETE EMPLOYEE
+    # ==========================================================
 
     def delete_employee(self):
 
-        self.open_pim()
+        self.log(
+            f"DELETE - Starting deletion for employee: "
+            f"{self.first_name}"
+        )
 
+        # Search employee
         self.search_employee()
 
-        row = self.page.locator(".oxd-table-row").filter(
+        # Locate employee row
+        row = self.page.locator(
+            ".oxd-table-row"
+        ).filter(
             has_text=self.first_name
         )
 
-        row.locator("button").nth(1).click()
+        expect(
+            row
+        ).to_be_visible(
+            timeout=15000
+        )
 
-        self.page.wait_for_load_state("domcontentloaded")
+        self.log(
+            "DELETE - Employee found for deletion"
+        )
 
-        # Screenshot Pop Up Confirmation Delete data User
-        Screenshot.take(self.page, "17. Pop Up Confirmation Delete data User")
+        # Click Delete button
+        row.locator(
+            "button"
+        ).nth(1).click()
 
-        self.page.get_by_role(
+        self.log(
+            "DELETE - Delete button clicked"
+        )
+
+        # Locate Delete confirmation button
+        delete_button = self.page.get_by_role(
             "button",
             name="Yes, Delete"
-        ).click()
+        )
 
-        self.page.wait_for_load_state("domcontentloaded")
+        # Wait until confirmation dialog is visible
+        expect(
+            delete_button
+        ).to_be_visible(
+            timeout=15000
+        )
 
-        # Take Screenshot Success Delete User
-        Screenshot.take(self.page, "18. Success Delete User")
+        self.log(
+            "DELETE - Delete confirmation dialog displayed"
+        )
+
+        # Take screenshot of delete confirmation
+        Screenshot.take(
+            self.page,
+            "Pop Up Confirmation Delete Data User",
+            wait_for=delete_button,
+            timeout=15000
+        )
+
+        # Confirm deletion
+        delete_button.click()
+
+        self.log(
+            "DELETE - Confirmed employee deletion"
+        )
+
+        # Waiting delete completed
+        pim_heading = self.page.get_by_role(
+            "heading",
+            name="PIM",
+            exact=True
+        )
+
+        expect(
+            pim_heading
+        ).to_be_visible(
+            timeout=30000
+        )
+
+        self.log(
+            "DELETE - Returned to PIM page"
+        )
+
+        # ======================================================
+        # VERIFY EMPLOYEE NO LONGER EXISTS
+        # ======================================================
+
+        employee_row = self.page.locator(
+            ".oxd-table-row"
+        ).filter(
+            has_text=self.first_name
+        )
+
+        expect(
+            employee_row
+        ).to_have_count(
+            0,
+            timeout=15000
+        )
+
+        self.log(
+            f"DELETE - Employee deleted successfully: "
+            f"{self.first_name}"
+        )
+
+        # Take screenshot after deletion
+        Screenshot.take(
+            self.page,
+            "Success Delete User",
+            wait_for=pim_heading,
+            timeout=15000
+        )
