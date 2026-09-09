@@ -4,14 +4,12 @@ from playwright.sync_api import Page, expect
 
 from Pages.login_page_ui import LoginUIPage
 from Utils.screenshot import Screenshot
+from Utils.config import ORANGEHRM_URL
 
 
 class LoginPage:
 
-    LOGIN_URL = (
-        "https://opensource-demo.orangehrmlive.com/"
-        "web/index.php/auth/login"
-    )
+    LOGIN_URL = ORANGEHRM_URL
 
     def __init__(self, page: Page, logger=None):
 
@@ -48,7 +46,8 @@ class LoginPage:
         )
 
         self.invalid_credentials = page.get_by_text(
-            "Invalid credentials"
+            "Invalid credentials",
+            exact=True
         )
 
     # =========================================================
@@ -80,16 +79,107 @@ class LoginPage:
         )
 
     # =========================================================
-    # NEGATIVE LOGIN
+    # POSITIVE LOGIN
     # =========================================================
 
-    def negative_login(self, username, password):
+    def positive_login(
+        self,
+        username,
+        password
+    ):
 
         self.open()
 
-        # -----------------------------------------------------
-        # WAIT LOGIN FORM
-        # -----------------------------------------------------
+        self.log(
+            "POSITIVE LOGIN - Waiting for login form"
+        )
+
+        Screenshot.take(
+            self.page,
+            "Login Page Positive",
+            wait_for=[
+                self.username_input,
+                self.password_input
+            ],
+            timeout=15000
+        )
+
+        self.log(
+            "POSITIVE LOGIN - Filling username"
+        )
+
+        self.username_input.fill(username)
+
+        self.log(
+            "POSITIVE LOGIN - Filling password"
+        )
+
+        self.password_input.fill(password)
+
+        Screenshot.take(
+            self.page,
+            "The input was completed"
+        )
+
+        self.log(
+            "POSITIVE LOGIN - Clicking Login button"
+        )
+
+        self.login_button.click()
+
+        self.log(
+            "POSITIVE LOGIN - Waiting for dashboard"
+        )
+
+        self.page.wait_for_url(
+            "**/dashboard/**",
+            wait_until="domcontentloaded",
+            timeout=10000
+        )
+
+        self.log(
+            "POSITIVE LOGIN - Verifying dashboard URL"
+        )
+
+        expect(
+            self.page
+        ).to_have_url(
+            re.compile(
+                r".*/dashboard/index"
+            ),
+            timeout=10000
+        )
+
+        self.log(
+            "POSITIVE LOGIN - Verifying Dashboard heading"
+        )
+
+        expect(
+            self.dashboard_heading
+        ).to_be_visible(
+            timeout=10000
+        )
+
+        self.log(
+            "POSITIVE LOGIN - Login successful"
+        )
+
+        Screenshot.take(
+            self.page,
+            "Login Success"
+        )
+
+    # =========================================================
+    # NEGATIVE LOGIN
+    # =========================================================
+
+    def negative_login(
+        self,
+        username,
+        password
+    ):
+
+        self.open()
 
         self.log(
             "NEGATIVE LOGIN - Waiting for login form"
@@ -104,10 +194,6 @@ class LoginPage:
             ],
             timeout=15000
         )
-
-        # -----------------------------------------------------
-        # INPUT CREDENTIALS
-        # -----------------------------------------------------
 
         self.log(
             "NEGATIVE LOGIN - Filling username"
@@ -126,19 +212,11 @@ class LoginPage:
             "The input was completed with an incorrect password"
         )
 
-        # -----------------------------------------------------
-        # CLICK LOGIN
-        # -----------------------------------------------------
-
         self.log(
             "NEGATIVE LOGIN - Clicking Login button"
         )
 
         self.login_button.click()
-
-        # -----------------------------------------------------
-        # VERIFY ERROR MESSAGE
-        # -----------------------------------------------------
 
         self.log(
             "NEGATIVE LOGIN - "
@@ -159,111 +237,4 @@ class LoginPage:
         Screenshot.take(
             self.page,
             "Login Failed"
-        )
-
-    # =========================================================
-    # POSITIVE LOGIN
-    # =========================================================
-
-    def positive_login(self, username, password):
-
-        self.open()
-
-        # -----------------------------------------------------
-        # WAIT LOGIN FORM
-        # -----------------------------------------------------
-
-        self.log(
-            "POSITIVE LOGIN - Waiting for login form"
-        )
-
-        Screenshot.take(
-            self.page,
-            "Login Page Positive",
-            wait_for=[
-                self.username_input,
-                self.password_input
-            ],
-            timeout=15000
-        )
-
-        # -----------------------------------------------------
-        # INPUT CREDENTIALS
-        # -----------------------------------------------------
-
-        self.log(
-            "POSITIVE LOGIN - Filling username"
-        )
-
-        self.username_input.fill(username)
-
-        self.log(
-            "POSITIVE LOGIN - Filling password"
-        )
-
-        self.password_input.fill(password)
-
-        Screenshot.take(
-            self.page,
-            "The input was completed"
-        )
-
-        # -----------------------------------------------------
-        # CLICK LOGIN
-        # -----------------------------------------------------
-
-        self.log(
-            "POSITIVE LOGIN - Clicking Login button"
-        )
-
-        self.login_button.click()
-
-        # -----------------------------------------------------
-        # WAIT DASHBOARD URL
-        # -----------------------------------------------------
-
-        self.log(
-            "POSITIVE LOGIN - Waiting for dashboard"
-        )
-
-        self.page.wait_for_url(
-            "**/dashboard/**",
-            timeout=10000
-        )
-
-        # -----------------------------------------------------
-        # VERIFY DASHBOARD URL
-        # -----------------------------------------------------
-
-        self.log(
-            "POSITIVE LOGIN - Verifying dashboard URL"
-        )
-
-        expect(
-            self.page
-        ).to_have_url(
-            re.compile(r".*/dashboard/index")
-        )
-
-        # -----------------------------------------------------
-        # VERIFY DASHBOARD HEADING
-        # -----------------------------------------------------
-
-        self.log(
-            "POSITIVE LOGIN - Verifying Dashboard heading"
-        )
-
-        expect(
-            self.dashboard_heading
-        ).to_be_visible(
-            timeout=10000
-        )
-
-        self.log(
-            "POSITIVE LOGIN - Login successful"
-        )
-
-        Screenshot.take(
-            self.page,
-            "Login Success"
         )

@@ -133,6 +133,17 @@ class EmployeePage:
             "CREATE - Add button clicked"
         )
 
+        # Wait until Records Found is visible
+        logindetails = self.page.get_by_text(
+            re.compile("Create Login Details")
+        )
+
+        expect(
+            logindetails
+        ).to_be_visible(
+            timeout=15000
+        )
+
         # Locate Add Employee heading
         add_employee_heading = self.page.get_by_role(
             "heading",
@@ -156,6 +167,7 @@ class EmployeePage:
             self.page,
             "Add User Page (PIM)",
             wait_for=[
+                logindetails,
                 add_employee_heading,
                 self.page.get_by_role(
                     "button",

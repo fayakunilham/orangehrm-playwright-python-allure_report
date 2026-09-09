@@ -20,11 +20,12 @@ class Screenshot:
 
     @classmethod
     def take(
-        cls,
-        page,
-        name,
-        wait_for=None,
-        timeout=15000
+            cls,
+            page,
+            name,
+            wait_for=None,
+            timeout=15000,
+            full_page=True
     ):
 
         # =====================================================

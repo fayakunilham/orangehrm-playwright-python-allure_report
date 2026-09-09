@@ -1,9 +1,25 @@
+import os
 import pytest
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
 from Pages.login_page import LoginPage
+
+
+# =========================================================
+# PROJECT CONFIGURATION
+# =========================================================
+
+# Root directory project
+BASE_DIR = Path(__file__).resolve().parent
+
+# .env location
+ENV_FILE = BASE_DIR / ".env"
+
+# Load environment variables
+load_dotenv(ENV_FILE)
 
 
 # =========================================================
@@ -22,26 +38,28 @@ def get_next_video_number(video_dir):
     # Membaca semua file dalam folder videos
     for file in video_dir.iterdir():
 
-        # Hanya membaca file video
+        # Hanya membaca file
         if not file.is_file():
             continue
 
+        # Hanya membaca file .webm
         if file.suffix.lower() != ".webm":
             continue
 
-        # Format:
+        # Format filename:
+        #
         # 1. TestLogin_20260901_140030.webm
+        #
+        # Ambil bagian sebelum "."
         if "." not in file.name:
             continue
 
         try:
 
-            # Mengambil nomor sebelum titik
             number = int(
                 file.name.split(".", 1)[0]
             )
 
-            # Simpan nomor terbesar
             max_number = max(
                 max_number,
                 number
@@ -71,7 +89,6 @@ def page(request):
         # LAUNCH BROWSER
         # =================================================
 
-        # Menjalankan Chromium dalam mode non-headless
         browser = p.chromium.launch(
             headless=False
         )
@@ -80,10 +97,8 @@ def page(request):
         # VIDEO DIRECTORY
         # =================================================
 
-        # Folder utama untuk semua video.
-        video_dir = Path("videos")
+        video_dir = BASE_DIR / "videos"
 
-        # Membuat folder jika belum tersedia.
         video_dir.mkdir(
             parents=True,
             exist_ok=True
@@ -93,8 +108,6 @@ def page(request):
         # CREATE BROWSER CONTEXT
         # =================================================
 
-        # Semua video akan disimpan langsung
-        # di folder videos.
         context = browser.new_context(
             record_video_dir=str(video_dir)
         )
@@ -109,12 +122,10 @@ def page(request):
         # PLAYWRIGHT TIMEOUT
         # =================================================
 
-        # Timeout default untuk action.
         page.set_default_timeout(
             10_000
         )
 
-        # Timeout khusus navigation.
         page.set_default_navigation_timeout(
             30_000
         )
@@ -134,7 +145,7 @@ def page(request):
         context.close()
 
         # =================================================
-        # GET VIDEO FILE
+        # GET VIDEO FILES
         # =================================================
 
         video_files = list(
@@ -150,16 +161,19 @@ def page(request):
         if test_class:
 
             # Contoh:
+            #
             # class TestAdminUserCRUD
             #
             # hasil:
+            #
             # TestAdminUserCRUD
+
             class_name = test_class.__name__
 
         else:
 
             # Jika test tidak menggunakan class,
-            # gunakan nama test method.
+            # gunakan nama test.
             class_name = request.node.name
 
         # =================================================
@@ -176,20 +190,21 @@ def page(request):
 
         if video_files:
 
-            # Mengambil video terbaru
+            # Ambil video terbaru
             video_file = max(
                 video_files,
                 key=lambda file: file.stat().st_mtime
             )
 
-            # Timestamp video
+            # Timestamp
             video_timestamp = datetime.now().strftime(
                 "%Y%m%d_%H%M%S"
             )
 
             # Nama video:
             #
-            # 1. TestAdminUserCRUD_20260901_140958.webm
+            # 1. TestLogin_20260908_141500.webm
+
             video_name = (
                 f"{video_number}. "
                 f"{class_name}_"
@@ -216,10 +231,38 @@ def page(request):
 def logged_in_page(page):
 
     # =====================================================
+    # GET CREDENTIALS FROM .ENV
+    # =====================================================
+
+    username = os.getenv(
+        "ORANGEHRM_USERNAME"
+    )
+
+    password = os.getenv(
+        "ORANGEHRM_PASSWORD"
+    )
+
+    # =====================================================
+    # VALIDATE ENVIRONMENT VARIABLES
+    # =====================================================
+
+    assert username, (
+        "ORANGEHRM_USERNAME environment variable "
+        "is not configured"
+    )
+
+    assert password, (
+        "ORANGEHRM_PASSWORD environment variable "
+        "is not configured"
+    )
+
+    # =====================================================
     # INITIALIZE LOGIN PAGE
     # =====================================================
 
-    login_page = LoginPage(page)
+    login_page = LoginPage(
+        page
+    )
 
     # =====================================================
     # OPEN LOGIN PAGE
@@ -232,12 +275,12 @@ def logged_in_page(page):
     # =====================================================
 
     login_page.positive_login(
-        "Admin",
-        "admin123"
+        username,
+        password
     )
 
     # =====================================================
-    # RETURN PAGE
+    # RETURN LOGGED-IN PAGE
     # =====================================================
 
     return page

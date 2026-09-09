@@ -529,5 +529,5 @@ class AdminPage:
 
         Screenshot.take(
             self.page,
-            "Admin - User Deleted"
+            "Admin - User Deleted Succesfully"
         )
