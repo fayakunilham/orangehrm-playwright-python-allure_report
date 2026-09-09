@@ -29,7 +29,7 @@ pipeline {
                 echo '========================================'
 
                 bat 'python --version'
-                bat 'pip --version'
+                bat 'python -m pip --version'
             }
         }
 
@@ -40,7 +40,7 @@ pipeline {
                 echo '========================================'
 
                 bat 'python -m pip install --upgrade pip'
-                bat 'pip install -r requirements.txt'
+                bat 'python -m pip install -r requirements.txt'
             }
         }
 
