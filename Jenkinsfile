@@ -3,6 +3,7 @@ pipeline {
     agent any
 
     environment {
+    PYTHON = 'C:\\Users\\Hype\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
 
         // Credentials Jenkins
         ORANGEHRM_URL = credentials('orangehrm-url')
@@ -28,8 +29,12 @@ pipeline {
                 echo 'PYTHON ENVIRONMENT'
                 echo '========================================'
 
-                bat 'python --version'
-                bat 'python -m pip --version'
+//                 bat 'python --version'
+//                 bat 'python -m pip --version'
+
+                bat '"%PYTHON%" --version'
+                bat '"%PYTHON%" -m pip --version'
+
             }
         }
 
@@ -39,8 +44,12 @@ pipeline {
                 echo 'INSTALL DEPENDENCIES'
                 echo '========================================'
 
-                bat 'python -m pip install --upgrade pip'
-                bat 'python -m pip install -r requirements.txt'
+//                 bat 'python -m pip install --upgrade pip'
+//                 bat 'python -m pip install -r requirements.txt'
+
+                bat '"%PYTHON%" -m pip install --upgrade pip'
+                bat '"%PYTHON%" -m pip install -r requirements.txt'
+
             }
         }
 
@@ -50,7 +59,10 @@ pipeline {
                 echo 'INSTALL PLAYWRIGHT BROWSER'
                 echo '========================================'
 
-                bat 'python -m playwright install chromium'
+//                 bat 'python -m playwright install chromium'
+
+                bat '"%PYTHON%" -m playwright install chromium'
+
             }
         }
 
