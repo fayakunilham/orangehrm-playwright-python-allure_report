@@ -90,12 +90,20 @@ pipeline {
                 echo 'RUN PLAYWRIGHT TEST'
                 echo '========================================'
 
-                bat '''
-                    pytest -v ^
-                    --alluredir=allure-results ^
-                    --log-file=logs/pytest.log ^
-                    --log-file-level=INFO
-                '''
+//                 bat '''
+//                     pytest -v ^
+//                     --alluredir=allure-results ^
+//                     --log-file=logs/pytest.log ^
+//                     --log-file-level=INFO
+//                 '''
+
+                    bat '''
+                        "%PYTHON%" -m pytest -v ^
+                        --alluredir=allure-results ^
+                        --log-file=logs/pytest.log ^
+                        --log-file-level=INFO
+                    '''
+
             }
         }
     }
