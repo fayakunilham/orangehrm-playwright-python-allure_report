@@ -8,23 +8,23 @@
 
 ## 📌 Deskripsi Proyek
 
-Repository ini berisi proyek Quality Assurance (QA) UI Automation Testing pada aplikasi OrangeHRM menggunakan Python, Playwright, Pytest, dan Allure Report.
+- Repository ini berisi proyek Quality Assurance (QA) UI Automation Testing pada aplikasi OrangeHRM menggunakan Python, Playwright, Pytest, dan Allure Report.
 
-Proyek ini dibuat untuk mengotomatisasi pengujian fungsional aplikasi web, memvalidasi hasil pengujian, serta mendukung proses analisis kegagalan melalui dokumentasi hasil eksekusi dan rekaman video browser.
+- Proyek ini dibuat untuk mengotomatisasi pengujian fungsional aplikasi web, memvalidasi hasil pengujian, serta mendukung proses analisis kegagalan melalui dokumentasi hasil eksekusi dan rekaman video browser.
 
-Framework menggunakan pendekatan Page Object Model (POM) melalui folder Pages, fixture pengujian melalui conftest.py, dan konfigurasi dependency melalui requirements.txt.
+- Framework menggunakan pendekatan Page Object Model (POM) melalui folder Pages, fixture pengujian melalui conftest.py, dan konfigurasi dependency melalui requirements.txt.
 
-Repository juga menyediakan Jenkinsfile untuk mendukung konfigurasi pipeline CI/CD. https://github.com/fayakunilham/orangehrm-playwright-python-allure_report/tree/automation_playwright
+- Repository juga menyediakan Jenkinsfile untuk mendukung konfigurasi pipeline CI/CD. https://github.com/fayakunilham/orangehrm-playwright-python-allure_report/tree/automation_playwright
 
 ## Tujuan Proyek
-Mengimplementasikan UI Automation Testing menggunakan Playwright dan Python.
-Mengotomatisasi pengujian fungsional aplikasi OrangeHRM.
-Menggunakan Pytest untuk menjalankan test case dan melakukan assertion.
-Menerapkan Page Object Model agar kode lebih terstruktur dan mudah dipelihara.
-Menggunakan fixture untuk mengelola browser dan halaman pengujian.
-Merekam video selama eksekusi pengujian untuk membantu proses debugging.
-Menghasilkan laporan pengujian menggunakan Allure Report.
-Mendukung integrasi automation testing melalui Jenkins.
+- Mengimplementasikan UI Automation Testing menggunakan Playwright dan Python.
+- Mengotomatisasi pengujian fungsional aplikasi OrangeHRM.
+- Menggunakan Pytest untuk menjalankan test case dan melakukan assertion.
+- Menerapkan Page Object Model agar kode lebih terstruktur dan mudah dipelihara.
+- Menggunakan fixture untuk mengelola browser dan halaman pengujian.
+- Merekam video selama eksekusi pengujian untuk membantu proses debugging.
+- Menghasilkan laporan pengujian menggunakan Allure Report.
+- Mendukung integrasi automation testing melalui Jenkins.
 
 ## 🌐 Aplikasi yang Diuji
 ### OrangeHRM — UI Automation Testing
@@ -129,7 +129,7 @@ Jika tidak ingin menggunakan Git:
 - Pilih Download ZIP.
 - Ekstrak file ZIP.
 - Buka terminal pada folder hasil ekstraksi.
-- 
+
 ### 5. Membuat Virtual Environment
 ```
 bash
