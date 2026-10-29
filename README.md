@@ -310,4 +310,4 @@ Software Quality Assurance | QA Automation Testing
 ---
 GitHub: https://github.com/fayakunilham
 
-Project ini dibuat untuk mempelajari dan mempraktikkan UI Automation Testing menggunakan Python, Playwright, Pytest, dan Allure Report.
+Project ini dibuat untuk mempelajari dan mempraktikkan UI & API Automation Testing menggunakan Python, Playwright, Pytest, dan Allure Report. Pengujian UI berfokus pada validasi fungsionalitas dan interaksi antarmuka aplikasi web OrangeHRM, sedangkan pengujian API berfokus pada validasi endpoint, HTTP status code, response, dan fungsionalitas layanan API. Hasil pengujian dapat dianalisis melalui Pytest dan Allure Report.
